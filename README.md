@@ -22,3 +22,5 @@ Once a date and time are picked, the choice is sent to a Google Sheet.
 
 The page is fully static. Responses are saved via a best-effort `no-cors` POST,
 so success is confirmed by checking the sheet, not the browser console.
+
+https://ga1ou.github.io/clickme/
