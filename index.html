@@ -87,7 +87,7 @@
     display:block;font-size:13px;font-weight:600;color:var(--ink-2);
     letter-spacing:.01em;margin-bottom:8px;
   }
-  input[type=date],input[type=time]{
+  input[type=text],input[type=date],input[type=time]{
     width:100%;font-family:inherit;font-weight:500;font-size:16px;color:var(--ink);
     padding:13px 14px;border:1px solid var(--line-strong);border-radius:12px;background:#fff;
     transition:border-color .18s var(--ease), box-shadow .18s var(--ease);
@@ -137,6 +137,10 @@
     <p class="sub">Pick a day and a time.</p>
 
     <div class="field">
+      <label for="nameInput">Your name</label>
+      <input type="text" id="nameInput" placeholder="e.g. Taylor" autocomplete="name" maxlength="60">
+    </div>
+    <div class="field">
       <label for="dateInput">Date</label>
       <input type="date" id="dateInput">
       <div class="quick" id="quickDays"></div>
@@ -184,7 +188,7 @@ const yesBtn = document.getElementById("yesBtn");
 const PAD = 16, NEAR = 105;     // smaller = lets the cursor get closer before it reacts
 const EASE = 0.08;              // lower = slower, gentler drift
 let runaway = false, rafOn = false;
-let curX = 0, curY = 0, tgtX = 0, tgtY = 0;
+let curX = 0, curY = 0, tgtX = 0, tgtY = 0, startedAt = 0;
 
 function startRunaway(){
   if (runaway) return;
@@ -194,6 +198,7 @@ function startRunaway(){
   noBtn.style.left = "0"; noBtn.style.top = "0";
   noBtn.style.zIndex = "50";
   render();
+  startedAt = performance.now();
   runaway = true;
   if (!reduceMotion){ rafOn = true; requestAnimationFrame(loop); }
 }
@@ -219,8 +224,26 @@ function pushFrom(px, py){
   const cx = curX + w / 2, cy = curY + h / 2;
   let dx = cx - px, dy = cy - py;
   const d = Math.hypot(dx, dy) || 1;
-  const force = 1 + (NEAR - Math.min(d, NEAR)) * 0.45;  // smaller = it only scoots a little (more playful / catchable-feeling)
+  const ramp = 0.3 + 0.7 * Math.min(1, (performance.now() - startedAt) / 400); // soft start: gentle for the first ~0.4s
+  const force = (12 + (NEAR - Math.min(d, NEAR)) * 0.45) * ramp;
   tgtX += (dx / d) * force; tgtY += (dy / d) * force;
+  // cap how far it can lead the cursor, so a fast mouse can't fling it across the screen
+  const lx = tgtX - curX, ly = tgtY - curY, lead = Math.hypot(lx, ly), MAX_LEAD = 110;
+  if (lead > MAX_LEAD){ tgtX = curX + lx / lead * MAX_LEAD; tgtY = curY + ly / lead * MAX_LEAD; }
+  clampTarget();
+  if (reduceMotion){ curX = tgtX; curY = tgtY; render(); }
+}
+
+// On a phone there's no hover to flee from — the finger lands directly on it.
+// So each tap makes it jump a clear, fixed distance away from the touch point.
+function dodgeTouch(px, py){
+  const w = noBtn.offsetWidth, h = noBtn.offsetHeight;
+  let dx = (curX + w / 2) - px, dy = (curY + h / 2) - py;
+  let d = Math.hypot(dx, dy);
+  if (d < 1){ const a = Math.random() * Math.PI * 2; dx = Math.cos(a); dy = Math.sin(a); d = 1; }
+  const JUMP = 170;                 // how far it leaps on each tap
+  tgtX = curX + (dx / d) * JUMP;
+  tgtY = curY + (dy / d) * JUMP;
   clampTarget();
   if (reduceMotion){ curX = tgtX; curY = tgtY; render(); }
 }
@@ -241,7 +264,12 @@ document.addEventListener("pointermove", (e)=>{
     startRunaway(); pushFrom(e.clientX, e.clientY);
   }
 });
-noBtn.addEventListener("pointerdown", (e)=>{ if (e.cancelable) e.preventDefault(); startRunaway(); pushFrom(e.clientX || curX + 30, e.clientY || curY + 30); });
+noBtn.addEventListener("pointerdown", (e)=>{
+  if (e.cancelable) e.preventDefault();
+  startRunaway();
+  if (e.pointerType === "touch") dodgeTouch(e.clientX, e.clientY);   // phone: clear jump per tap
+  else pushFrom(e.clientX || curX + 30, e.clientY || curY + 30);     // mouse/pen
+});
 noBtn.addEventListener("focus", ()=>{ startRunaway(); pushFrom(curX - 40, curY); });
 noBtn.addEventListener("click", (e)=>{ e.preventDefault(); });
 window.addEventListener("resize", ()=>{ if (runaway) clampTarget(); });
@@ -295,12 +323,17 @@ function buildQuickDays(){
 }
 
 document.getElementById("confirmBtn").addEventListener("click", ()=>{
+  const nameInput = document.getElementById("nameInput");
+  const name = nameInput.value.trim();
+  if (!name){ nameInput.focus(); return; }
   if (!dateInput.value){ dateInput.focus(); return; }
+
   const whenText = formatWhen(dateInput.value, timeInput.value);
   document.getElementById("finalWhen").textContent = whenText;
+  document.getElementById("finalHeadline").textContent = "See you then, " + name + ".";
   if (CONFIG.senderName) document.getElementById("finalNote").textContent = CONFIG.senderName + " will be there.";
 
-  saveResponse({ date: dateInput.value, time: timeInput.value, when: whenText, name: CONFIG.recipientName });
+  saveResponse({ date: dateInput.value, time: timeInput.value, when: whenText, name: name });
   showScreen("finalScreen");
 });
 
