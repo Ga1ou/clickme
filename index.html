@@ -163,6 +163,7 @@
 const CONFIG = {
   recipientName: "",
   senderName: "",
+  // Google Apps Script Web App URL (the one ending in /exec)
   webAppUrl: "https://script.google.com/macros/s/AKfycbwGDK2f6Kc44Oj1H2eWZC2m_0TfSr2gQFMFj1G5-Ae8RzFw1q_Nwqw90gQRIinKU-O0/exec"
 };
 /* ============================================================ */
@@ -180,8 +181,8 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").match
 const noBtn = document.getElementById("noBtn");
 const yesBtn = document.getElementById("yesBtn");
 
-const PAD = 16, NEAR = 150;     // starts easing away when the cursor is this close
-const EASE = 0.07;              // lower = slower, gentler drift
+const PAD = 16, NEAR = 105;     // smaller = lets the cursor get closer before it reacts
+const EASE = 0.08;              // lower = slower, gentler drift
 let runaway = false, rafOn = false;
 let curX = 0, curY = 0, tgtX = 0, tgtY = 0;
 
@@ -218,7 +219,7 @@ function pushFrom(px, py){
   const cx = curX + w / 2, cy = curY + h / 2;
   let dx = cx - px, dy = cy - py;
   const d = Math.hypot(dx, dy) || 1;
-  const force = 20 + (NEAR - Math.min(d, NEAR)) * 0.9;   // closer cursor = a little more push
+  const force = 12 + (NEAR - Math.min(d, NEAR)) * 0.45;  // smaller = it only scoots a little (more playful / catchable-feeling)
   tgtX += (dx / d) * force; tgtY += (dy / d) * force;
   clampTarget();
   if (reduceMotion){ curX = tgtX; curY = tgtY; render(); }
