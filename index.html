@@ -219,7 +219,7 @@ function pushFrom(px, py){
   const cx = curX + w / 2, cy = curY + h / 2;
   let dx = cx - px, dy = cy - py;
   const d = Math.hypot(dx, dy) || 1;
-  const force = 12 + (NEAR - Math.min(d, NEAR)) * 0.45;  // smaller = it only scoots a little (more playful / catchable-feeling)
+  const force = 1 + (NEAR - Math.min(d, NEAR)) * 0.45;  // smaller = it only scoots a little (more playful / catchable-feeling)
   tgtX += (dx / d) * force; tgtY += (dy / d) * force;
   clampTarget();
   if (reduceMotion){ curX = tgtX; curY = tgtY; render(); }
