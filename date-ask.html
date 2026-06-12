@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>A question</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#ffffff;
+    --bg-2:#f5f4f1;
+    --surface:#ffffff;
+    --ink:#1d1d1f;
+    --ink-2:#6e6e73;
+    --line:rgba(0,0,0,.09);
+    --line-strong:rgba(0,0,0,.16);
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:var(--ink);
+    background:radial-gradient(130% 100% at 50% 0%, var(--bg-1) 0%, var(--bg-2) 70%, #efeeea 100%);
+    min-height:100dvh;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;position:relative;
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  .stage{position:relative;z-index:2;width:100%;max-width:440px;padding:24px}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:48px 40px 40px;
+    text-align:center;
+    box-shadow:0 1px 2px rgba(0,0,0,.04), 0 24px 60px -28px rgba(0,0,0,.22);
+  }
+
+  .eyebrow{
+    font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-2);margin-bottom:16px;
+  }
+  h1{
+    font-weight:600;letter-spacing:-.021em;
+    font-size:clamp(25px,6vw,33px);line-height:1.22;color:var(--ink);
+  }
+  .sub{
+    font-size:15px;font-weight:400;color:var(--ink-2);
+    margin-top:14px;line-height:1.5;
+  }
+
+  .buttons{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:34px}
+
+  button{
+    font-family:inherit;font-weight:500;font-size:16px;
+    border:none;cursor:pointer;border-radius:980px;
+    padding:14px 30px;transition:transform .18s var(--ease), background .2s var(--ease), box-shadow .2s var(--ease), border-color .2s var(--ease);
+  }
+  button:active{transform:scale(.98)}
+  button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+  .yes{
+    background:var(--ink);color:#fff;
+    box-shadow:0 1px 2px rgba(0,0,0,.18);
+  }
+  .yes:hover{background:#000;transform:translateY(-1px)}
+
+  .no{
+    background:var(--surface);color:var(--ink-2);
+    border:1px solid var(--line-strong);
+    will-change:transform;
+  }
+
+  /* screens */
+  .screen{display:none}
+  .screen.show{display:block;animation:enter .55s var(--ease) both}
+  @keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  .field{margin:22px 0;text-align:left}
+  .field label{
+    display:block;font-size:13px;font-weight:600;color:var(--ink-2);
+    letter-spacing:.01em;margin-bottom:8px;
+  }
+  input[type=date],input[type=time]{
+    width:100%;font-family:inherit;font-weight:500;font-size:16px;color:var(--ink);
+    padding:13px 14px;border:1px solid var(--line-strong);border-radius:12px;background:#fff;
+    transition:border-color .18s var(--ease), box-shadow .18s var(--ease);
+  }
+  input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(0,0,0,.06)}
+
+  .quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .chip{
+    font-family:inherit;font-weight:500;font-size:13px;
+    background:#fff;border:1px solid var(--line-strong);color:var(--ink-2);
+    padding:8px 15px;border-radius:980px;cursor:pointer;
+    transition:all .18s var(--ease);
+  }
+  .chip:hover{border-color:var(--ink-2)}
+  .chip.active{background:var(--ink);border-color:var(--ink);color:#fff}
+
+  .confirm-btn{width:100%;margin-top:30px;background:var(--ink);color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.18)}
+  .confirm-btn:hover{background:#000}
+
+  .when{
+    margin-top:22px;border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px;background:#fafafa;font-weight:500;font-size:17px;color:var(--ink);
+  }
+  .final .sub{margin-top:18px}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <!-- Question -->
+  <section class="card screen show" id="askScreen">
+    <div class="eyebrow">A question</div>
+    <h1 id="question">Would you go on a date with me?</h1>
+    <p class="sub">An honest answer, please.</p>
+    <div class="buttons">
+      <button class="yes" id="yesBtn">Yes</button>
+      <button class="no" id="noBtn">No</button>
+    </div>
+  </section>
+
+  <!-- Date picker -->
+  <section class="card screen" id="dateScreen">
+    <div class="eyebrow">Wonderful</div>
+    <h1>When works for you?</h1>
+    <p class="sub">Pick a day and a time.</p>
+
+    <div class="field">
+      <label for="dateInput">Date</label>
+      <input type="date" id="dateInput">
+      <div class="quick" id="quickDays"></div>
+    </div>
+    <div class="field">
+      <label for="timeInput">Time</label>
+      <input type="time" id="timeInput" value="19:00">
+    </div>
+
+    <button class="confirm-btn" id="confirmBtn">Confirm</button>
+  </section>
+
+  <!-- Final -->
+  <section class="card screen final" id="finalScreen">
+    <div class="eyebrow">It's a date</div>
+    <h1 id="finalHeadline">See you then.</h1>
+    <div class="when" id="finalWhen">—</div>
+    <p class="sub" id="finalNote">I'll be there.</p>
+  </section>
+</div>
+
+<script>
+/* ====== Optional: put names here (leave blank to hide) ====== */
+const CONFIG = {
+  recipientName: "",
+  senderName: "",
+  // Paste your Google Apps Script Web App URL here (the one ending in /exec)
+  webAppUrl: ""
+};
+/* ============================================================ */
+
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+(function setupNames(){
+  if (CONFIG.recipientName){
+    document.getElementById("question").textContent =
+      CONFIG.recipientName + ", would you go on a date with me?";
+  }
+})();
+
+/* ---------- No button: slow, smooth glide that tracks the cursor ---------- */
+const noBtn = document.getElementById("noBtn");
+const yesBtn = document.getElementById("yesBtn");
+
+const PAD = 16, NEAR = 150;     // starts easing away when the cursor is this close
+const EASE = 0.07;              // lower = slower, gentler drift
+let runaway = false, rafOn = false;
+let curX = 0, curY = 0, tgtX = 0, tgtY = 0;
+
+function startRunaway(){
+  if (runaway) return;
+  const r = noBtn.getBoundingClientRect();
+  curX = tgtX = r.left; curY = tgtY = r.top;
+  noBtn.style.position = "fixed";
+  noBtn.style.left = "0"; noBtn.style.top = "0";
+  noBtn.style.zIndex = "50";
+  render();
+  runaway = true;
+  if (!reduceMotion){ rafOn = true; requestAnimationFrame(loop); }
+}
+
+function render(){
+  const tilt = Math.max(-7, Math.min(7, (tgtX - curX) * 0.04));  // subtle lean
+  noBtn.style.transform = "translate(" + curX + "px," + curY + "px) rotate(" + tilt + "deg)";
+}
+
+function clampTarget(){
+  const w = noBtn.offsetWidth, h = noBtn.offsetHeight;
+  const maxX = window.innerWidth - w - PAD, maxY = window.innerHeight - h - PAD;
+  if ((tgtX < PAD || tgtX > maxX) && (tgtY < PAD || tgtY > maxY)){
+    tgtX = curX < window.innerWidth / 2 ? maxX : PAD;   // glide to the far corner, not jump
+    tgtY = curY < window.innerHeight / 2 ? maxY : PAD;
+  }
+  tgtX = Math.max(PAD, Math.min(maxX, tgtX));
+  tgtY = Math.max(PAD, Math.min(maxY, tgtY));
+}
+
+function pushFrom(px, py){
+  const w = noBtn.offsetWidth, h = noBtn.offsetHeight;
+  const cx = curX + w / 2, cy = curY + h / 2;
+  let dx = cx - px, dy = cy - py;
+  const d = Math.hypot(dx, dy) || 1;
+  const force = 20 + (NEAR - Math.min(d, NEAR)) * 0.9;   // closer cursor = a little more push
+  tgtX += (dx / d) * force; tgtY += (dy / d) * force;
+  clampTarget();
+  if (reduceMotion){ curX = tgtX; curY = tgtY; render(); }
+}
+
+function loop(){
+  if (!rafOn) return;
+  curX += (tgtX - curX) * EASE;     // slowly eases toward the target every frame
+  curY += (tgtY - curY) * EASE;
+  render();
+  requestAnimationFrame(loop);
+}
+
+document.addEventListener("pointermove", (e)=>{
+  if (e.pointerType === "touch") return;
+  const r = noBtn.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  if (Math.hypot(e.clientX - cx, e.clientY - cy) < NEAR){
+    startRunaway(); pushFrom(e.clientX, e.clientY);
+  }
+});
+noBtn.addEventListener("pointerdown", (e)=>{ if (e.cancelable) e.preventDefault(); startRunaway(); pushFrom(e.clientX || curX + 30, e.clientY || curY + 30); });
+noBtn.addEventListener("focus", ()=>{ startRunaway(); pushFrom(curX - 40, curY); });
+noBtn.addEventListener("click", (e)=>{ e.preventDefault(); });
+window.addEventListener("resize", ()=>{ if (runaway) clampTarget(); });
+
+/* ---------- screens ---------- */
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("show"));
+  document.getElementById(id).classList.add("show");
+}
+
+yesBtn.addEventListener("click", ()=>{
+  rafOn = false; runaway = false;
+  noBtn.style.position = ""; noBtn.style.transform = ""; noBtn.style.left = ""; noBtn.style.top = "";
+  showScreen("dateScreen");
+  buildQuickDays();
+});
+
+/* ---------- date picker ---------- */
+const dateInput = document.getElementById("dateInput");
+const timeInput = document.getElementById("timeInput");
+const today = new Date();
+dateInput.min = toISO(today);
+
+function toISO(d){ const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().split("T")[0]; }
+function formatWhen(dateStr, timeStr){
+  const d = new Date(dateStr + "T" + (timeStr || "19:00"));
+  const datePart = d.toLocaleDateString("en-US", { weekday:"long", month:"long", day:"numeric" });
+  const timePart = d.toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" });
+  return datePart + "  \u00B7  " + timePart;
+}
+
+function buildQuickDays(){
+  const wrap = document.getElementById("quickDays");
+  if (wrap.childElementCount) return;
+  const opts = [
+    { label:"This weekend", offset:(6 - today.getDay() + 7) % 7 || 7 },
+    { label:"Next Friday", offset:((5 - today.getDay() + 7) % 7) + 7 },
+    { label:"Tomorrow", offset:1 }
+  ];
+  opts.forEach(o=>{
+    const d = new Date(today); d.setDate(d.getDate() + o.offset);
+    const chip = document.createElement("button");
+    chip.type = "button"; chip.className = "chip"; chip.textContent = o.label;
+    chip.addEventListener("click", ()=>{
+      dateInput.value = toISO(d);
+      document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+      chip.classList.add("active");
+    });
+    wrap.appendChild(chip);
+  });
+}
+
+document.getElementById("confirmBtn").addEventListener("click", ()=>{
+  if (!dateInput.value){ dateInput.focus(); return; }
+  const whenText = formatWhen(dateInput.value, timeInput.value);
+  document.getElementById("finalWhen").textContent = whenText;
+  if (CONFIG.senderName) document.getElementById("finalNote").textContent = CONFIG.senderName + " will be there.";
+
+  saveResponse({ date: dateInput.value, time: timeInput.value, when: whenText, name: CONFIG.recipientName });
+  showScreen("finalScreen");
+});
+
+/* Send the choice to your Google Sheet. Best-effort: uses no-cors so it works
+   from a static page (we can't read the response, but the row still gets written). */
+function saveResponse(payload){
+  if (!CONFIG.webAppUrl) return;   // not configured yet
+  try {
+    fetch(CONFIG.webAppUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    }).catch(function(){});         // never block her on a network error
+  } catch (e) { /* ignore */ }
+}
+</script>
+</body>
+</html>
